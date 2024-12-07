@@ -1,27 +1,13 @@
 package com.argentbank.argentbankApi.model;
 
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
-
-import java.util.Date;
-
-@Document(collection = "users")
-public class User {
-    @Id
-    private String id;
+public class SignupRequest {
     private String email;
     private String password;
     private String firstName;
     private String lastName;
     private String userName;
-    private Date createdAt;
-    private Date updatedAt;
 
-    public User() {}
-
-    public String getId() {
-        return id;
-    }
+    public SignupRequest() {}
 
     public String getEmail() {
         return email;
@@ -61,21 +47,5 @@ public class User {
 
     public void setUserName(String userName) {
         this.userName = userName;
-    }
-
-    public Date getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(Date createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public Date getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setUpdatedAt(Date updatedAt) {
-        this.updatedAt = updatedAt;
     }
 }

@@ -1,5 +1,6 @@
 package com.argentbank.argentbankApi.Utils;
 
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import org.springframework.stereotype.Component;
 
@@ -10,25 +11,27 @@ import java.util.Date;
 public class JwtUtils {
 
     private final String JWT_SECRET = "secret_key";
-    private final long JWT_EXPIRATION = 86400;
-    private final SecretKey key = Jwts.SIG.HS256.key().build();
+    private final SecretKey secretKey = Jwts.SIG.HS256.key().build();
 
     public String generateToken(String user) {
+        long JWT_EXPIRATION = 86400;
         return Jwts.builder()
                 .subject(user)
                 .issuedAt(new Date())
                 .expiration(new Date(new Date().getTime() + JWT_EXPIRATION))
-                .signWith(key)
+                .signWith(secretKey)
                 .compact();
     }
 
-    public boolean getUserFromToken(String token, String user) {
-        return Jwts.parser()
-                .verifyWith(key)
+    public String getUserFromToken(String token) {
+        String value = token.substring(7);
+
+        Claims claims = Jwts.parser()
+                .verifyWith(secretKey)
                 .build()
-                .parseSignedClaims(token)
-                .getPayload()
-                .getSubject()
-                .equals(user);
+                .parseSignedClaims(value)
+                .getPayload();
+
+        return claims.getSubject();
     }
 }
