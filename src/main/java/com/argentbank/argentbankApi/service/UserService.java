@@ -1,6 +1,5 @@
 package com.argentbank.argentbankApi.service;
 
-import com.argentbank.argentbankApi.Utils.JwtUtils;
 import com.argentbank.argentbankApi.model.SignupRequest;
 import com.argentbank.argentbankApi.model.User;
 import com.argentbank.argentbankApi.repository.UserRepository;
@@ -11,12 +10,10 @@ import org.springframework.stereotype.Service;
 public class UserService {
 
     private final UserRepository userRepository;
-    private final JwtUtils jwtUtils;
     private final PasswordEncoder passwordEncoder;
 
-    public UserService(UserRepository userRepository, JwtUtils jwtUtils, PasswordEncoder passwordEncoder) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
-        this.jwtUtils = jwtUtils;
         this.passwordEncoder = passwordEncoder;
     }
 

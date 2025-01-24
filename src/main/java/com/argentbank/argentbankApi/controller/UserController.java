@@ -6,7 +6,6 @@ import com.argentbank.argentbankApi.model.*;
 import com.argentbank.argentbankApi.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
@@ -16,12 +15,10 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
 
     private final UserService userService;
-    private final AuthenticationManager authenticationManager;
     private final JwtUtils jwtUtils;
 
-    public UserController(UserService userService, AuthenticationManager authenticationManager, JwtUtils jwtUtils) {
+    public UserController(UserService userService, JwtUtils jwtUtils) {
         this.userService = userService;
-        this.authenticationManager = authenticationManager;
         this.jwtUtils = jwtUtils;
     }
 
@@ -64,7 +61,8 @@ public class UserController {
                 return ResponseUtil.buildResponse(HttpStatus.NOT_FOUND, "User not found", null);
             }
 
-            return ResponseUtil.buildResponse(HttpStatus.OK, "User profile retrieved successfully", new ProfileResponse(user));
+            return ResponseUtil.buildResponse(HttpStatus.OK, "User profile retrieved successfully",
+                    new ProfileResponse(user));
         } catch (Exception e) {
             return ResponseUtil.buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Internal Server Error", null);
         }

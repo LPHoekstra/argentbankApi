@@ -1,7 +1,5 @@
 package com.argentbank.argentbankApi.model;
 
-import org.springframework.http.HttpStatus;
-
 public class ApiResponse {
     private int status;
     private String message;
