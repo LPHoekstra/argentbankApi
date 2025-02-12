@@ -30,19 +30,23 @@ public class UserController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
-        boolean isAuthenticated = userService.authenticate(loginRequest.getEmail(), loginRequest.getPassword());
-        if (!isAuthenticated) {
+        try {
+            User user = userService.authenticate(loginRequest.getEmail(), loginRequest.getPassword());
+
+            String token = jwtUtils.generateToken(user.getEmail());
+
+            return ResponseUtil.buildResponse(HttpStatus.OK, "Login successfully", new LoginResponse(token));
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
             return ResponseUtil.buildResponse(HttpStatus.BAD_REQUEST, "Invalid email or password", null);
         }
-
-        String token = jwtUtils.generateToken(loginRequest.getEmail());
-        return ResponseUtil.buildResponse(HttpStatus.OK, "Login successfully", new LoginResponse(token));
     }
 
     @PostMapping("/signup")
     public ResponseEntity<?> signup(@RequestBody SignupRequest signupRequest) {
-        boolean isSignup = userService.createUser(signupRequest);
-        if (!isSignup) {
+        boolean emailAldreadyExist = userService.createUser(signupRequest);
+
+        if (!emailAldreadyExist) {
             return ResponseUtil.buildResponse(HttpStatus.BAD_REQUEST, "Invalid email", null);
         }
 
@@ -52,6 +56,7 @@ public class UserController {
     @GetMapping("/profile")
     public ResponseEntity<?> getProfile(@RequestHeader("Authorization") String token) {
         try {
+            // check token and get email stored in token
             String email = jwtUtils.getUserFromToken(token);
 
             User user = userService.findUserByEmail(email);
@@ -76,6 +81,7 @@ public class UserController {
     public ResponseEntity<?> changeProfile(@RequestHeader("Authorization") String token,
             @RequestBody ChangeProfileRequest ChangeProfileRequest) {
         try {
+            // check token and get email stored in token
             String email = jwtUtils.getUserFromToken(token);
 
             User user = userService.findUserByEmail(email);

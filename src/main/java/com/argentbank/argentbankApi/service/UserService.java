@@ -17,19 +17,19 @@ public class UserService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    public boolean authenticate(String email, String password) {
+    public User authenticate(String email, String password) {
         // if no user is find, return false
         User user = userRepository.findByEmail(email);
         if (user == null) {
-            return false;
+            throw new RuntimeException("User not find");
         }
 
         // check if the password is correct
         if (!passwordEncoder.matches(password, user.getPassword())) {
-            return false;
+            throw new RuntimeException("Invalid password");
         }
 
-        return true;
+        return user;
     }
 
     public boolean createUser(SignupRequest signupRequest) {
