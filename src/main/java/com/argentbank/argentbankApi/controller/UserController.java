@@ -2,12 +2,12 @@ package com.argentbank.argentbankApi.controller;
 
 import com.argentbank.argentbankApi.Utils.JwtUtils;
 import com.argentbank.argentbankApi.Utils.ResponseUtil;
+import com.argentbank.argentbankApi.exception.HttpWithMsgException;
 import com.argentbank.argentbankApi.model.*;
 import com.argentbank.argentbankApi.service.UserService;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -30,7 +30,6 @@ public class UserController {
         }
 
         String token = jwtUtils.generateToken(loginRequest.getEmail());
-        // must return the jsonwebtoken
         return ResponseUtil.buildResponse(HttpStatus.OK, "Login successfully", new LoginResponse(token));
     }
 
@@ -46,12 +45,6 @@ public class UserController {
 
     @GetMapping("/profile")
     public ResponseEntity<?> getProfile(@RequestHeader("Authorization") String token) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        if (authentication == null || !authentication.isAuthenticated()) {
-            return ResponseUtil.buildResponse(HttpStatus.UNAUTHORIZED, "Unauthorized access", null);
-        }
-
         try {
             String email = jwtUtils.getUserFromToken(token);
 
@@ -63,8 +56,12 @@ public class UserController {
 
             return ResponseUtil.buildResponse(HttpStatus.OK, "User profile retrieved successfully",
                     new ProfileResponse(user));
+        } catch (HttpWithMsgException e) {
+            System.out.println(e.geStatus());
+            System.out.println(e.getMessage());
+            return ResponseUtil.buildResponse(e.geStatus(), e.getMessage(), null);
         } catch (Exception e) {
-            return ResponseUtil.buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Internal Server Error", null);
+            return ResponseUtil.buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Server error", null);
         }
     }
 }

@@ -1,5 +1,7 @@
 package com.argentbank.argentbankApi.config;
 
+import java.util.List;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -8,18 +10,22 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.web.cors.CorsConfiguration;
 
 @Configuration
 public class SecurityConfig {
-    // need a refactoring
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .csrf().disable()
-                .authorizeHttpRequests(authorizeRequests -> authorizeRequests
-                        .requestMatchers("/api/v1/user/signup", "/api/v1/user/login", "/api/v1/user/profile").permitAll()
-                        .anyRequest().authenticated()
-                );
+                .cors(cors -> cors.configurationSource(_ -> {
+                    var corsConfiguration = new CorsConfiguration();
+                    corsConfiguration.setAllowedOrigins(List.of("http://localhost:3000"));
+                    corsConfiguration.setAllowedMethods(List.of("GET", "POST", "PUT"));
+                    corsConfiguration.setAllowedHeaders(List.of("*"));
+                    corsConfiguration.setAllowCredentials(true);
+                    return corsConfiguration;
+                }))
+                .csrf(csrf -> csrf.disable());
         return http.build();
     }
 
