@@ -39,7 +39,8 @@ public class JwtUtils {
     }
 
     public String generateToken(String user) {
-        long JWT_EXPIRATION = 86400;
+        // token valide for one hour
+        long JWT_EXPIRATION = 60 * 60 * 1000L;
         return Jwts.builder()
                 .subject(user)
                 .issuedAt(new Date())

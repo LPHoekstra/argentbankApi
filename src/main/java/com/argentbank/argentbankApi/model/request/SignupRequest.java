@@ -1,4 +1,4 @@
-package com.argentbank.argentbankApi.model;
+package com.argentbank.argentbankApi.model.request;
 
 public class SignupRequest {
     private String email;
@@ -7,7 +7,8 @@ public class SignupRequest {
     private String lastName;
     private String userName;
 
-    public SignupRequest() {}
+    public SignupRequest() {
+    }
 
     public String getEmail() {
         return email;

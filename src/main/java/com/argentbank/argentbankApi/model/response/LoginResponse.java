@@ -1,4 +1,4 @@
-package com.argentbank.argentbankApi.model;
+package com.argentbank.argentbankApi.model.response;
 
 public class LoginResponse {
     private String token;

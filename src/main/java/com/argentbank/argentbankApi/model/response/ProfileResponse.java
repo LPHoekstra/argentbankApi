@@ -1,6 +1,8 @@
-package com.argentbank.argentbankApi.model;
+package com.argentbank.argentbankApi.model.response;
 
 import org.springframework.data.annotation.Id;
+
+import com.argentbank.argentbankApi.model.User;
 
 public class ProfileResponse {
     @Id

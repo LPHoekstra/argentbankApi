@@ -1,7 +1,7 @@
 package com.argentbank.argentbankApi.service;
 
-import com.argentbank.argentbankApi.model.SignupRequest;
 import com.argentbank.argentbankApi.model.User;
+import com.argentbank.argentbankApi.model.request.SignupRequest;
 import com.argentbank.argentbankApi.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -52,5 +52,12 @@ public class UserService {
 
     public User findUserByEmail(String email) {
         return userRepository.findByEmail(email);
+    }
+
+    public boolean changeUser(User user, String userName) {
+        user.setUserName(userName);
+        userRepository.save(user);
+
+        return true;
     }
 }

@@ -96,7 +96,7 @@ paths:
         '200':
           description: User profile retrieved successully
           schema:
-            $ref: '#/definitions/ApiResponse'
+            $ref: '#/definitions/UserProfileResponse'
         '400':
           description: Invalid Fields
         '500':
@@ -248,6 +248,18 @@ definitions:
     properties:
       userName:
         type: string
+  UserProfileResponse:
+    type: object
+    properties:
+      status:
+        type: integer
+      message:
+        type: string
+      body:
+        type: object
+        properties:
+          userName:
+            type: string
   TransactionsAccount:
     type: array
     items: 
