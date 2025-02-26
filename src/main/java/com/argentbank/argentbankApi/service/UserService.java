@@ -1,9 +1,12 @@
 package com.argentbank.argentbankApi.service;
 
+import com.argentbank.argentbankApi.exception.HttpWithMsgException;
 import com.argentbank.argentbankApi.model.User;
 import com.argentbank.argentbankApi.model.request.LoginRequest;
 import com.argentbank.argentbankApi.model.request.SignupRequest;
 import com.argentbank.argentbankApi.repository.UserRepository;
+
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -22,12 +25,12 @@ public class UserService {
         // if no user is find, return false
         User user = userRepository.findByEmail(loginRequest.getEmail());
         if (user == null) {
-            throw new RuntimeException("User not find");
+            throw new HttpWithMsgException(HttpStatus.BAD_REQUEST, "User not find");
         }
 
         // check if the password is correct
         if (!passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
-            throw new RuntimeException("Invalid password");
+            throw new HttpWithMsgException(HttpStatus.BAD_REQUEST, "Invalid password");
         }
 
         return user;

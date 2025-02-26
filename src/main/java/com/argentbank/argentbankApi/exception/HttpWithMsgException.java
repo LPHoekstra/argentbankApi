@@ -10,7 +10,7 @@ public class HttpWithMsgException extends RuntimeException {
         this.status = status;
     }
 
-    public HttpStatus geStatus() {
+    public HttpStatus getStatus() {
         return status;
     }
 }

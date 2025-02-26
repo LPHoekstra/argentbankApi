@@ -5,13 +5,16 @@ import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Component
 public class PortLogger implements ApplicationRunner {
     @Value("${server.port}")
     private String port;
 
     public void run(ApplicationArguments arguments) {
-        System.out.println("Server running on port : " + port);
+        log.info("Server running on port : " + port);
     }
 
 }
