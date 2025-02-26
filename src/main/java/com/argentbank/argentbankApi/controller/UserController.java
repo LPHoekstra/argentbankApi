@@ -7,6 +7,7 @@ import com.argentbank.argentbankApi.model.*;
 import com.argentbank.argentbankApi.model.request.ChangeProfileRequest;
 import com.argentbank.argentbankApi.model.request.LoginRequest;
 import com.argentbank.argentbankApi.model.request.SignupRequest;
+import com.argentbank.argentbankApi.model.response.ApiResponse;
 import com.argentbank.argentbankApi.model.response.ChangeProfileResponse;
 import com.argentbank.argentbankApi.model.response.LoginResponse;
 import com.argentbank.argentbankApi.model.response.ProfileResponse;
@@ -29,9 +30,9 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<ApiResponse> login(@RequestBody LoginRequest loginRequest) {
         try {
-            User user = userService.authenticate(loginRequest.getEmail(), loginRequest.getPassword());
+            User user = userService.authenticate(loginRequest);
 
             String token = jwtUtils.generateToken(user.getEmail());
 
@@ -43,10 +44,10 @@ public class UserController {
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<?> signup(@RequestBody SignupRequest signupRequest) {
-        boolean emailAldreadyExist = userService.createUser(signupRequest);
+    public ResponseEntity<ApiResponse> signup(@RequestBody SignupRequest signupRequest) {
+        boolean isEmailAldreadyExist = userService.createUser(signupRequest);
 
-        if (!emailAldreadyExist) {
+        if (!isEmailAldreadyExist) {
             return ResponseUtil.buildResponse(HttpStatus.BAD_REQUEST, "Invalid email", null);
         }
 
@@ -54,7 +55,7 @@ public class UserController {
     }
 
     @GetMapping("/profile")
-    public ResponseEntity<?> getProfile(@RequestHeader("Authorization") String token) {
+    public ResponseEntity<ApiResponse> getProfile(@RequestHeader("Authorization") String token) {
         try {
             // check token and get email stored in token
             String email = jwtUtils.getUserFromToken(token);
@@ -78,12 +79,13 @@ public class UserController {
     }
 
     @PutMapping("/profile")
-    public ResponseEntity<?> changeProfile(@RequestHeader("Authorization") String token,
+    public ResponseEntity<ApiResponse> changeProfile(@RequestHeader("Authorization") String token,
             @RequestBody ChangeProfileRequest ChangeProfileRequest) {
         try {
             // check token and get email stored in token
             String email = jwtUtils.getUserFromToken(token);
 
+            // get the user then change his profile name
             User user = userService.findUserByEmail(email);
             userService.changeUser(user, ChangeProfileRequest.getUserName());
 
