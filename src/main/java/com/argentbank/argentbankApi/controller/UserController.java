@@ -67,6 +67,18 @@ public class UserController {
         return ResponseUtil.buildResponse(HttpStatus.OK, "Signup successfully", null);
     }
 
+    @DeleteMapping("/logout")
+    public ResponseEntity<ApiResponse> logout(@RequestHeader("Authorization") String token) {
+        try {
+            jwtUtils.invalidateToken(token);
+
+            return ResponseUtil.buildResponse(HttpStatus.OK, "disconnected", null);
+        } catch (Exception e) {
+            log.error("Error on logout: {}", e.getMessage());
+            return ResponseUtil.buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Error server", null);
+        }
+    }
+
     @GetMapping("/profile")
     public ResponseEntity<ApiResponse> getProfile(@RequestHeader("Authorization") String token) {
         try {
@@ -87,7 +99,7 @@ public class UserController {
                     new ProfileResponse(user));
 
         } catch (HttpWithMsgException e) {
-            log.warn("error: {} message: {}", e.getStatus(), e.getMessage());
+            log.warn("error in GET profile: {} message: {}", e.getStatus(), e.getMessage());
             return ResponseUtil.buildResponse(e.getStatus(), e.getMessage(), null);
 
         } catch (Exception e) {
@@ -116,7 +128,7 @@ public class UserController {
                     new ChangeProfileResponse(user.getUserName()));
 
         } catch (HttpWithMsgException e) {
-            log.warn("error: {} message: {}", e.getStatus(), e.getMessage());
+            log.warn("error in PUT profile: {} message: {}", e.getStatus(), e.getMessage());
             return ResponseUtil.buildResponse(e.getStatus(), e.getMessage(), null);
 
         } catch (Exception e) {
