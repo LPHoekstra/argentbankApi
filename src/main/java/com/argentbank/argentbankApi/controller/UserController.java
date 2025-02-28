@@ -1,6 +1,5 @@
 package com.argentbank.argentbankApi.controller;
 
-import com.argentbank.argentbankApi.Utils.JwtUtils;
 import com.argentbank.argentbankApi.Utils.ResponseUtil;
 import com.argentbank.argentbankApi.exception.HttpWithMsgException;
 import com.argentbank.argentbankApi.model.*;
@@ -11,10 +10,12 @@ import com.argentbank.argentbankApi.model.response.ApiResponse;
 import com.argentbank.argentbankApi.model.response.ChangeProfileResponse;
 import com.argentbank.argentbankApi.model.response.LoginResponse;
 import com.argentbank.argentbankApi.model.response.ProfileResponse;
+import com.argentbank.argentbankApi.service.JwtService;
 import com.argentbank.argentbankApi.service.UserService;
 
 import lombok.extern.slf4j.Slf4j;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -25,9 +26,10 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
 
     private final UserService userService;
-    private final JwtUtils jwtUtils;
+    private final JwtService jwtUtils;
 
-    public UserController(UserService userService, JwtUtils jwtUtils) {
+    @Autowired
+    public UserController(UserService userService, JwtService jwtUtils) {
         this.userService = userService;
         this.jwtUtils = jwtUtils;
     }
@@ -36,7 +38,7 @@ public class UserController {
     public ResponseEntity<ApiResponse> login(@RequestBody LoginRequest loginRequest) {
         try {
             log.debug("Login with email: {}", loginRequest.getEmail());
-            User user = userService.authenticate(loginRequest);
+            User user = userService.login(loginRequest);
 
             String token = jwtUtils.generateToken(user.getEmail());
 
@@ -44,8 +46,10 @@ public class UserController {
             return ResponseUtil.buildResponse(HttpStatus.OK, "Login successfully", new LoginResponse(token));
 
         } catch (HttpWithMsgException e) {
-            log.warn("Failed login with email: {} error: {}", loginRequest.getEmail(), e.getMessage());
-            return ResponseUtil.buildResponse(e.getStatus(), "Invalid email or password", null);
+            log.warn("Failed login with email: {} error: {} {}", loginRequest.getEmail(), e.getStatus(),
+                    e.getMessage());
+            // return bad request for security purpose
+            return ResponseUtil.buildResponse(HttpStatus.BAD_REQUEST, "Invalid email or password", null);
 
         } catch (Exception e) {
             log.error(e.getMessage());

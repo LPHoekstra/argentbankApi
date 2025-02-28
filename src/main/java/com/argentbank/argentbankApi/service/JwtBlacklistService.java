@@ -7,8 +7,6 @@ import java.util.concurrent.TimeUnit;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import com.argentbank.argentbankApi.Utils.JwtUtils;
-
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -16,9 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 public class JwtBlacklistService {
     private final ConcurrentHashMap<String, Long> blacklist = new ConcurrentHashMap<>();
 
-    public void addToBlackList(String token) {
-        Date expirationDate = JwtUtils.getExpirationDate(token);
-
+    public void addToBlackList(String token, Date expirationDate) {
         if (expirationDate != null) {
             long expirationTime = expirationDate.getTime();
             blacklist.put(token, expirationTime);

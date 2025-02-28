@@ -1,4 +1,4 @@
-package com.argentbank.argentbankApi.Utils;
+package com.argentbank.argentbankApi.service;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -8,25 +8,51 @@ import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.security.SignatureException;
 import lombok.extern.slf4j.Slf4j;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import com.argentbank.argentbankApi.exception.BlackListedException;
 import com.argentbank.argentbankApi.exception.HttpWithMsgException;
-import com.argentbank.argentbankApi.service.JwtBlacklistService;
 
 import javax.crypto.SecretKey;
 import java.util.Date;
 
 @Slf4j
-@Component
-public class JwtUtils {
-
+@Service
+public class JwtService {
     private final SecretKey secretKey = Jwts.SIG.HS256.key().build();
+
+    private final JwtBlacklistService jwtBlacklistService;
+
+    @Autowired
+    public JwtService(JwtBlacklistService jwtBlacklistService) {
+        this.jwtBlacklistService = jwtBlacklistService;
+    }
+
+    public String generateToken(String user) {
+        // token valide for one hour
+        long JWT_EXPIRATION = 60 * 60 * 1000L;
+        return Jwts.builder()
+                .subject(user)
+                .issuedAt(new Date())
+                .expiration(new Date(new Date().getTime() + JWT_EXPIRATION))
+                .signWith(secretKey)
+                .compact();
+    }
+
+    public String getUserFromToken(String token) {
+        return verifyToken(extractToken(token)).getPayload().getSubject();
+    }
+
+    public void invalidateToken(String token) {
+        String tokenValue = extractToken(token);
+        jwtBlacklistService.addToBlackList(tokenValue, getExpirationDate(tokenValue));
+    }
 
     private Jws<Claims> verifyToken(String token) {
         try {
-            Boolean isBlackListed = JwtBlacklistService.isBlackListed(token);
+            Boolean isBlackListed = jwtBlacklistService.isBlackListed(token);
             if (isBlackListed) {
                 throw new BlackListedException("Token is blacklisted");
             }
@@ -42,7 +68,7 @@ public class JwtUtils {
         } catch (MalformedJwtException e) {
             throw new HttpWithMsgException(HttpStatus.UNAUTHORIZED, "Malformed token");
         } catch (SignatureException e) {
-            throw new HttpWithMsgException(HttpStatus.UNAUTHORIZED, "Invalid Token");
+            throw new HttpWithMsgException(HttpStatus.UNAUTHORIZED, "Invalid token");
         } catch (BlackListedException e) {
             throw new HttpWithMsgException(HttpStatus.UNAUTHORIZED, e.getMessage());
         } catch (Exception e) {
@@ -50,31 +76,7 @@ public class JwtUtils {
         }
     }
 
-    public String generateToken(String user) {
-        // token valide for one hour
-        long JWT_EXPIRATION = 60 * 60 * 1000L;
-        return Jwts.builder()
-                .subject(user)
-                .issuedAt(new Date())
-                .expiration(new Date(new Date().getTime() + JWT_EXPIRATION))
-                .signWith(secretKey)
-                .compact();
-    }
-
-    public String getUserFromToken(String token) {
-        String tokenValue = extractToken(token);
-
-        Jws<Claims> claims = verifyToken(tokenValue);
-
-        return claims.getPayload().getSubject();
-    }
-
-    public void invalidateToken(String token) {
-        String tokenValue = extractToken(token);
-        JwtBlacklistService.addToBlackList(tokenValue);
-    }
-
-    public Date getExpirationDate(String token) {
+    private Date getExpirationDate(String token) {
         Claims claims = Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload();
 
         return claims.getExpiration();
@@ -82,8 +84,10 @@ public class JwtUtils {
 
     // remove "bearer " from token
     private String extractToken(String token) {
-        String value = token.substring(7);
+        if (token == null || !token.startsWith("Bearer ")) {
+            throw new HttpWithMsgException(HttpStatus.UNAUTHORIZED, "Invalid token format");
+        }
 
-        return value;
+        return token.substring(7);
     }
 }

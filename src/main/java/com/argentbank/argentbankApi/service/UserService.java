@@ -21,16 +21,16 @@ public class UserService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    public User authenticate(LoginRequest loginRequest) {
+    public User login(LoginRequest loginRequest) {
         // if no user is find, return false
         User user = userRepository.findByEmail(loginRequest.getEmail());
         if (user == null) {
-            throw new HttpWithMsgException(HttpStatus.BAD_REQUEST, "User not find");
+            throw new HttpWithMsgException(HttpStatus.NOT_FOUND, "User not found");
         }
 
         // check if the password is correct
         if (!passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
-            throw new HttpWithMsgException(HttpStatus.BAD_REQUEST, "Invalid password");
+            throw new HttpWithMsgException(HttpStatus.UNAUTHORIZED, "Invalid password");
         }
 
         return user;
