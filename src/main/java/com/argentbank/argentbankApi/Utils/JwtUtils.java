@@ -2,6 +2,7 @@ package com.argentbank.argentbankApi.Utils;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.security.SignatureException;
@@ -10,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
+import com.argentbank.argentbankApi.exception.BlackListedException;
 import com.argentbank.argentbankApi.exception.HttpWithMsgException;
 import com.argentbank.argentbankApi.service.JwtBlacklistService;
 
@@ -22,26 +24,27 @@ public class JwtUtils {
 
     private final SecretKey secretKey = Jwts.SIG.HS256.key().build();
 
-    // TODO : remove the boolean return
-    private boolean verifyToken(String token) {
+    private Jws<Claims> verifyToken(String token) {
         try {
             Boolean isBlackListed = JwtBlacklistService.isBlackListed(token);
             if (isBlackListed) {
-                return false;
+                throw new BlackListedException("Token is blacklisted");
             }
 
-            Jwts.parser()
+            Jws<Claims> claims = Jwts.parser()
                     .verifyWith(secretKey)
                     .build()
                     .parseSignedClaims(token);
 
-            return true;
+            return claims;
         } catch (ExpiredJwtException e) {
             throw new HttpWithMsgException(HttpStatus.UNAUTHORIZED, "Token expired");
         } catch (MalformedJwtException e) {
             throw new HttpWithMsgException(HttpStatus.UNAUTHORIZED, "Malformed token");
         } catch (SignatureException e) {
             throw new HttpWithMsgException(HttpStatus.UNAUTHORIZED, "Invalid Token");
+        } catch (BlackListedException e) {
+            throw new HttpWithMsgException(HttpStatus.UNAUTHORIZED, e.getMessage());
         } catch (Exception e) {
             throw new RuntimeException("Error on token validation : " + e.getMessage());
         }
@@ -61,18 +64,9 @@ public class JwtUtils {
     public String getUserFromToken(String token) {
         String tokenValue = extractToken(token);
 
-        Boolean isValidToken = verifyToken(tokenValue);
-        if (!isValidToken) {
-            throw new HttpWithMsgException(HttpStatus.UNAUTHORIZED, "Token expired");
-        }
+        Jws<Claims> claims = verifyToken(tokenValue);
 
-        Claims claims = Jwts.parser()
-                .verifyWith(secretKey)
-                .build()
-                .parseSignedClaims(tokenValue)
-                .getPayload();
-
-        return claims.getSubject();
+        return claims.getPayload().getSubject();
     }
 
     public void invalidateToken(String token) {
