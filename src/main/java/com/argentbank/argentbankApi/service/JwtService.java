@@ -105,7 +105,7 @@ public class JwtService {
     // remove "bearer " from token
     private String extractToken(String token) {
         if (token == null || !token.startsWith("Bearer ")) {
-            throw new HttpWithMsgException(HttpStatus.UNAUTHORIZED, "Invalid token format");
+            throw new HttpWithMsgException(HttpStatus.UNAUTHORIZED, "Invalid token format, does not have 'Bearer '");
         }
 
         return token.substring(7);

@@ -6,9 +6,9 @@ import static org.mockito.Mockito.when;
 
 import java.util.Date;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 
@@ -22,10 +22,15 @@ import io.jsonwebtoken.Jwts;
 public class getUserFromTokenTest {
 
     @Mock
-    JwtBlacklistService jwtBlacklistService;
+    private JwtBlacklistService jwtBlacklistService;
 
-    @Autowired
     private JwtService jwtService;
+
+    @BeforeEach
+    void setUp() {
+        String secret = "fh7ZBsC7I9OokW92A1dMXjx6lufpMNKO6gU2sXXtNr0";
+        jwtService = new JwtService(jwtBlacklistService, secret);
+    }
 
     @Test
     void getUserFromValidToken() throws Exception {
@@ -59,5 +64,31 @@ public class getUserFromTokenTest {
                 () -> jwtService.getUserFromToken(bearerToken));
         assertEquals(HttpStatus.UNAUTHORIZED, exception.getStatus());
         assertEquals("Token expired", exception.getMessage());
+    }
+
+    @Test
+    void getUserFromInvalidTokenShouldFail() throws Exception {
+        String malformedToken = "invalid.token";
+
+        // act
+        HttpWithMsgException exception = assertThrows(HttpWithMsgException.class,
+                () -> jwtService.getUserFromToken(malformedToken));
+        assertEquals(HttpStatus.UNAUTHORIZED, exception.getStatus());
+        assertEquals("Invalid token format, does not have 'Bearer '", exception.getMessage());
+    }
+
+    @Test
+    void getUserFromBlackListedTokenShouldFail() throws Exception {
+        String userBlackListed = "blacklistedUser@gmail.com";
+        String token = jwtService.generateToken(userBlackListed);
+        String bearerToken = "Bearer " + token;
+
+        when(jwtBlacklistService.isBlackListed(token)).thenReturn(true);
+
+        // act
+        HttpWithMsgException exception = assertThrows(HttpWithMsgException.class,
+                () -> jwtService.getUserFromToken(bearerToken));
+        assertEquals(HttpStatus.UNAUTHORIZED, exception.getStatus());
+        assertEquals("Token is blacklisted", exception.getMessage());
     }
 }
