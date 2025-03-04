@@ -35,7 +35,11 @@ public class JwtService {
         this.secretKey = Keys.hmacShaKeyFor(Base64.getDecoder().decode(secret));
     }
 
-    // "user" correspond to an email
+    /**
+     * 
+     * @param user email
+     * @return
+     */
     public String generateToken(String user) {
         // token valide for one hour
         long JWT_EXPIRATION = 60 * 60 * 1000L;
@@ -47,10 +51,19 @@ public class JwtService {
                 .compact();
     }
 
+    /**
+     * 
+     * @param token with "Bearer "
+     * @return the user email : "test@gmail.com"
+     */
     public String getUserFromToken(String token) {
         return verifyToken(extractToken(token)).getPayload().getSubject();
     }
 
+    /**
+     * 
+     * @param token with "Bearer "
+     */
     public void invalidateToken(String token) {
         String tokenValue = extractToken(token);
         Date expirationDate = verifyToken(tokenValue).getPayload().getExpiration();
@@ -58,6 +71,11 @@ public class JwtService {
         jwtBlacklistService.addToBlackList(tokenValue, expirationDate);
     }
 
+    /**
+     * 
+     * @param token only without "Bearer "
+     * @return
+     */
     private Jws<Claims> verifyToken(String token) {
         try {
             Boolean isBlackListed = jwtBlacklistService.isBlackListed(token);
