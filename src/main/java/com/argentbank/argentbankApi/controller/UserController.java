@@ -1,6 +1,7 @@
 package com.argentbank.argentbankApi.controller;
 
 import com.argentbank.argentbankApi.Utils.ResponseUtil;
+import com.argentbank.argentbankApi.exception.BlackListedException;
 import com.argentbank.argentbankApi.exception.HttpWithMsgException;
 import com.argentbank.argentbankApi.model.*;
 import com.argentbank.argentbankApi.model.request.ChangeProfileRequest;
@@ -77,6 +78,9 @@ public class UserController {
             jwtUtils.invalidateToken(token);
 
             return ResponseUtil.buildResponse(HttpStatus.OK, "disconnected", null);
+        } catch (BlackListedException e) {
+            log.error(e.getMessage());
+            return ResponseUtil.buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Error server", null);
         } catch (Exception e) {
             log.error("Error on logout: {}", e.getMessage());
             return ResponseUtil.buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Error server", null);

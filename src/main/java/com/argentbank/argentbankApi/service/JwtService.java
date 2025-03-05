@@ -68,7 +68,12 @@ public class JwtService {
         String tokenValue = extractToken(token);
         Date expirationDate = verifyToken(tokenValue).getPayload().getExpiration();
 
-        jwtBlacklistService.addToBlackList(tokenValue, expirationDate);
+        Boolean isBlacklisted = jwtBlacklistService.addToBlackList(tokenValue, expirationDate);
+        if (!isBlacklisted) {
+            throw new BlackListedException("Token is not blacklisted");
+        }
+
+        log.info("token {} black listed", token);
     }
 
     /**

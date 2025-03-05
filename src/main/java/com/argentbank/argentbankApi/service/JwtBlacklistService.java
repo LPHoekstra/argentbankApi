@@ -14,12 +14,21 @@ import lombok.extern.slf4j.Slf4j;
 public class JwtBlacklistService {
     private final ConcurrentHashMap<String, Long> blacklist = new ConcurrentHashMap<>();
 
-    public void addToBlackList(String token, Date expirationDate) {
-        if (expirationDate != null) {
-            long expirationTime = expirationDate.getTime();
-            blacklist.put(token, expirationTime);
-            log.info("token {} black listed", token);
+    /**
+     * 
+     * @param token
+     * @param expirationDate of the token
+     * @return a boolean if the token is blacklisted with success or not
+     */
+    public Boolean addToBlackList(String token, Date expirationDate) {
+        long expirationTime = expirationDate.getTime();
+        Long isBlacklisted = blacklist.put(token, expirationTime);
+
+        if (isBlacklisted != null) {
+            return false;
         }
+
+        return true;
     }
 
     public boolean isBlackListed(String token) {
