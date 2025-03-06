@@ -7,6 +7,8 @@ import java.util.concurrent.TimeUnit;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import com.argentbank.argentbankApi.exception.BlackListedException;
+
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -35,6 +37,13 @@ public class JwtBlacklistService {
         return true;
     }
 
+    /**
+     * Check if a token is blacklisted or not.
+     * 
+     * @param token as value
+     * @return true if the token is currently backlisted. Otherwise return false if
+     *         the token is not blacklisted or if he's removed from the blacklist.
+     */
     public boolean isBlackListed(String token) {
         Long expirationTime = blacklist.get(token);
 
@@ -45,9 +54,14 @@ public class JwtBlacklistService {
 
         // is token expired
         if (System.currentTimeMillis() >= expirationTime) {
-            blacklist.remove(token);
-            log.info("Expired token {} removed from blacklist", token);
-            return false;
+            Long tokenRemovedFromBlacklist = blacklist.remove(token);
+
+            if (tokenRemovedFromBlacklist != null) {
+                log.info("Expired token {} removed from blacklist", tokenRemovedFromBlacklist);
+                return false;
+            }
+
+            throw new BlackListedException("error in blacklist remove");
         }
 
         log.info("token {} is blacklisted", token);

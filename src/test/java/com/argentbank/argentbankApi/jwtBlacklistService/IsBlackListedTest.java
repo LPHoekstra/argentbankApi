@@ -25,9 +25,10 @@ public class IsBlackListedTest {
     }
 
     @Test
-    void isBlacklistedWithSuccess() throws Exception {
+    void tokenIsBlacklisted() throws Exception {
         String token = "test.token";
-        Long expirationTime = new Date().getTime() + 60 * 1000L;
+        // expire in one hour
+        Long expirationTime = new Date().getTime() + 60 * 60 * 1000L;
 
         when(blacklistMock.get(token)).thenReturn(expirationTime);
 
@@ -46,5 +47,20 @@ public class IsBlackListedTest {
         Boolean isBlacklisted = jwtBlacklistService.isBlackListed(token);
 
         assertFalse(isBlacklisted, "token is not blacklisted");
+    }
+
+    @Test
+    void tokenIsExpiredAndRemovedFromBlacklist() throws Exception {
+        String token = "test.token";
+        // expired one minute ago
+        Long expirationTime = new Date().getTime() - 60 * 1000L;
+
+        when(blacklistMock.get(token)).thenReturn(expirationTime);
+        when(blacklistMock.remove(token)).thenReturn(expirationTime);
+
+        // act
+        Boolean isBlacklisted = jwtBlacklistService.isBlackListed(token);
+
+        assertFalse(isBlacklisted, "token is removed from the blacklist because he expired");
     }
 }
