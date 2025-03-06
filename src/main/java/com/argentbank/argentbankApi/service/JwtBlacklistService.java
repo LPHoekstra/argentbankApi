@@ -38,10 +38,12 @@ public class JwtBlacklistService {
     public boolean isBlackListed(String token) {
         Long expirationTime = blacklist.get(token);
 
+        // if the token is not blacklisted
         if (expirationTime == null) {
             return false;
         }
 
+        // is token expired
         if (System.currentTimeMillis() >= expirationTime) {
             blacklist.remove(token);
             log.info("Expired token {} removed from blacklist", token);

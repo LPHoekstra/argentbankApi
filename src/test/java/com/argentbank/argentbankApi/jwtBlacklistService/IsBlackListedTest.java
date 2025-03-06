@@ -1,5 +1,6 @@
 package com.argentbank.argentbankApi.jwtBlacklistService;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
@@ -34,5 +35,16 @@ public class IsBlackListedTest {
         Boolean isBlacklisted = jwtBlacklistService.isBlackListed(token);
 
         assertTrue(isBlacklisted, "Token must be in the blacklist");
+    }
+
+    @Test
+    void tokenIsNotBlacklisted() throws Exception {
+        String token = "test.token";
+
+        when(blacklistMock.get(token)).thenReturn(null);
+        // act
+        Boolean isBlacklisted = jwtBlacklistService.isBlackListed(token);
+
+        assertFalse(isBlacklisted, "token is not blacklisted");
     }
 }
