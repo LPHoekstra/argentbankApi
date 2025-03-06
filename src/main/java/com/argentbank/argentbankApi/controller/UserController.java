@@ -14,13 +14,17 @@ import com.argentbank.argentbankApi.model.response.ProfileResponse;
 import com.argentbank.argentbankApi.service.JwtService;
 import com.argentbank.argentbankApi.service.UserService;
 
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 
+@Validated
 @Slf4j
 @RestController
 @RequestMapping("/api/v1/user")
@@ -36,7 +40,7 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<ApiResponse> login(@RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<ApiResponse> login(@Valid @RequestBody LoginRequest loginRequest) {
         try {
             log.debug("Login with email: {}", loginRequest.getEmail());
             User user = userService.login(loginRequest);
@@ -59,7 +63,7 @@ public class UserController {
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<ApiResponse> signup(@RequestBody SignupRequest signupRequest) {
+    public ResponseEntity<ApiResponse> signup(@Valid @RequestBody SignupRequest signupRequest) {
         log.debug("Signup with email: {}", signupRequest.getEmail());
         boolean isEmailAldreadyExist = userService.createUser(signupRequest);
 
@@ -118,7 +122,7 @@ public class UserController {
 
     @PutMapping("/profile")
     public ResponseEntity<ApiResponse> changeProfile(@RequestHeader("Authorization") String token,
-            @RequestBody ChangeProfileRequest ChangeProfileRequest) {
+            @Valid @RequestBody ChangeProfileRequest ChangeProfileRequest) {
         try {
             log.debug("PUT on /api/v1/users/profile");
 
@@ -143,5 +147,11 @@ public class UserController {
             log.error("Error in PUT profile: {}", e.getMessage());
             return ResponseUtil.buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Error server", null);
         }
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ApiResponse> validationException(MethodArgumentNotValidException ex) {
+        log.error("Invalide request", ex.getMessage());
+        return ResponseUtil.buildResponse(HttpStatus.BAD_REQUEST, "Invalid field", null);
     }
 }
