@@ -12,7 +12,11 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Service
 public class JwtBlacklistService {
-    private final ConcurrentHashMap<String, Long> blacklist = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, Long> blacklist;
+
+    public JwtBlacklistService(ConcurrentHashMap<String, Long> blacklist) {
+        this.blacklist = blacklist;
+    }
 
     /**
      * 
