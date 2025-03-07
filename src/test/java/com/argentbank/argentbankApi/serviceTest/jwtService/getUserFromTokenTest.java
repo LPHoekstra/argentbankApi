@@ -1,4 +1,4 @@
-package com.argentbank.argentbankApi.jwtService;
+package com.argentbank.argentbankApi.serviceTest.jwtService;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;

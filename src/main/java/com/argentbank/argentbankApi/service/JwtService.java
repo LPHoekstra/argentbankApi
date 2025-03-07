@@ -38,7 +38,7 @@ public class JwtService {
     /**
      * 
      * @param user email
-     * @return
+     * @return the token in String
      */
     public String generateToken(String user) {
         // token valide for one hour
@@ -70,7 +70,7 @@ public class JwtService {
 
         Boolean isBlacklisted = jwtBlacklistService.addToBlackList(tokenValue, expirationDate);
         if (!isBlacklisted) {
-            throw new BlackListedException("Token is not blacklisted");
+            throw new BlackListedException("Token already blacklisted");
         }
 
         log.info("token {} black listed", token);

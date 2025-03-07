@@ -1,4 +1,4 @@
-package com.argentbank.argentbankApi.jwtBlacklistService;
+package com.argentbank.argentbankApi.serviceTest.jwtBlacklistService;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;

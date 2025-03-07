@@ -31,12 +31,12 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
 
     private final UserService userService;
-    private final JwtService jwtUtils;
+    private final JwtService jwtService;
 
     @Autowired
-    public UserController(UserService userService, JwtService jwtUtils) {
+    public UserController(UserService userService, JwtService jwtService) {
         this.userService = userService;
-        this.jwtUtils = jwtUtils;
+        this.jwtService = jwtService;
     }
 
     @PostMapping("/login")
@@ -45,7 +45,7 @@ public class UserController {
             log.debug("Login with email: {}", loginRequest.getEmail());
             User user = userService.login(loginRequest);
 
-            String token = jwtUtils.generateToken(user.getEmail());
+            String token = jwtService.generateToken(user.getEmail());
 
             log.info("Login successfully with email: {}", user.getEmail());
             return ResponseUtil.buildResponse(HttpStatus.OK, "Login successfully", new LoginResponse(token));
@@ -58,36 +58,48 @@ public class UserController {
 
         } catch (Exception e) {
             log.error(e.getMessage());
-            return ResponseUtil.buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Error server", null);
+            return ResponseUtil.buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Server error", null);
         }
     }
 
     @PostMapping("/signup")
     public ResponseEntity<ApiResponse> signup(@Valid @RequestBody SignupRequest signupRequest) {
-        log.debug("Signup with email: {}", signupRequest.getEmail());
-        boolean isEmailAldreadyExist = userService.createUser(signupRequest);
+        try {
 
-        if (!isEmailAldreadyExist) {
-            log.warn("Tried signup with email: {} but email already used", signupRequest.getEmail());
-            return ResponseUtil.buildResponse(HttpStatus.BAD_REQUEST, "Invalid email", null);
+            log.debug("Signup with email: {}", signupRequest.getEmail());
+            boolean isEmailAldreadyExist = userService.createUser(signupRequest);
+
+            if (!isEmailAldreadyExist) {
+                log.warn("Tried signup with email: {} but email already used", signupRequest.getEmail());
+                return ResponseUtil.buildResponse(HttpStatus.BAD_REQUEST, "Invalid email", null);
+            }
+
+            log.info("Account with email: {} created with success", signupRequest.getEmail());
+            return ResponseUtil.buildResponse(HttpStatus.OK, "Signup successfully", null);
+
+        } catch (Exception e) {
+            log.error("Error during signup: {}", e.getMessage());
+            return ResponseUtil.buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Server error", null);
         }
-
-        log.info("Account with email: {} created with success", signupRequest.getEmail());
-        return ResponseUtil.buildResponse(HttpStatus.OK, "Signup successfully", null);
     }
 
     @DeleteMapping("/logout")
     public ResponseEntity<ApiResponse> logout(@RequestHeader("Authorization") String token) {
         try {
-            jwtUtils.invalidateToken(token);
+            if (token == null || token.isBlank()) {
+                return ResponseUtil.buildResponse(HttpStatus.BAD_REQUEST, "Missing token", null);
+            }
 
+            jwtService.invalidateToken(token);
             return ResponseUtil.buildResponse(HttpStatus.OK, "disconnected", null);
+
         } catch (BlackListedException e) {
-            log.error(e.getMessage());
-            return ResponseUtil.buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Error server", null);
+            log.warn("Token already blacklisted: {}", token);
+            return ResponseUtil.buildResponse(HttpStatus.BAD_REQUEST, "Token already invalid", null);
+
         } catch (Exception e) {
-            log.error("Error on logout: {}", e.getMessage());
-            return ResponseUtil.buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Error server", null);
+            log.error("Error on logout: {}", e);
+            return ResponseUtil.buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Server error", null);
         }
     }
 
@@ -97,7 +109,7 @@ public class UserController {
             log.debug("GET on /api/v1/users/profile");
 
             // check token and get email stored in token
-            String email = jwtUtils.getUserFromToken(token);
+            String email = jwtService.getUserFromToken(token);
 
             User user = userService.findUserByEmail(email);
 
@@ -116,7 +128,7 @@ public class UserController {
 
         } catch (Exception e) {
             log.error("Error in GET profile: {}", e.getMessage());
-            return ResponseUtil.buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Error server", null);
+            return ResponseUtil.buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Server error", null);
         }
     }
 
@@ -127,7 +139,7 @@ public class UserController {
             log.debug("PUT on /api/v1/users/profile");
 
             // check token and get email stored in token
-            String email = jwtUtils.getUserFromToken(token);
+            String email = jwtService.getUserFromToken(token);
 
             // get the user then change his profile name
             User user = userService.findUserByEmail(email);
@@ -145,7 +157,7 @@ public class UserController {
 
         } catch (Exception e) {
             log.error("Error in PUT profile: {}", e.getMessage());
-            return ResponseUtil.buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Error server", null);
+            return ResponseUtil.buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Server error", null);
         }
     }
 
