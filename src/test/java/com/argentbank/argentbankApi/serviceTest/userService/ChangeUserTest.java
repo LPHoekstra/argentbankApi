@@ -1,7 +1,7 @@
 package com.argentbank.argentbankApi.serviceTest.userService;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -32,10 +32,10 @@ public class ChangeUserTest {
         user.setUserName("defaultUsername");
 
         // act
-        Boolean isUserChanged = userService.changeUser(user, changedUserName);
+        User updatedUser = userService.changeUserName(user, changedUserName);
 
         verify(userRepository, times(1)).save(any(User.class));
-        assertTrue(isUserChanged);
-        assertEquals(changedUserName, user.getUserName());
+        assertNotNull(updatedUser);
+        assertEquals(changedUserName, updatedUser.getUserName());
     }
 }

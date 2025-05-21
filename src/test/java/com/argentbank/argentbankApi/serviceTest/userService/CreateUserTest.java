@@ -1,7 +1,8 @@
 package com.argentbank.argentbankApi.serviceTest.userService;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -17,6 +18,8 @@ import com.argentbank.argentbankApi.model.User;
 import com.argentbank.argentbankApi.model.request.SignupRequest;
 import com.argentbank.argentbankApi.repository.UserRepository;
 import com.argentbank.argentbankApi.service.UserService;
+
+import jakarta.persistence.EntityExistsException;
 
 @SpringBootTest
 public class CreateUserTest {
@@ -43,9 +46,10 @@ public class CreateUserTest {
         when(passwordEncoder.encode(signupRequest.getPassword())).thenReturn("encodedPassword");
 
         // act
-        Boolean isUserCreated = userService.createUser(signupRequest);
+        User createdUser = userService.createUser(signupRequest);
 
-        assertTrue(isUserCreated);
+        assertEquals(signupRequest.getLastName(), createdUser.getLastName());
+        assertNotNull(createdUser);
         verify(userRepository, times(1)).save(any(User.class));
     }
 
@@ -61,9 +65,7 @@ public class CreateUserTest {
         when(userRepository.existsByEmail(signupRequest.getEmail())).thenReturn(true);
 
         // act
-        Boolean isUserCreated = userService.createUser(signupRequest);
-
-        assertFalse(isUserCreated);
+        assertThrows(EntityExistsException.class, () -> userService.createUser(signupRequest));
         verify(userRepository, times(0)).save(any(User.class));
     }
 }

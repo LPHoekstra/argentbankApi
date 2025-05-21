@@ -1,12 +1,14 @@
 package com.argentbank.argentbankApi.service;
 
-import com.argentbank.argentbankApi.exception.HttpWithMsgException;
+import com.argentbank.argentbankApi.exception.UnauthorizedException;
 import com.argentbank.argentbankApi.model.User;
 import com.argentbank.argentbankApi.model.request.LoginRequest;
 import com.argentbank.argentbankApi.model.request.SignupRequest;
 import com.argentbank.argentbankApi.repository.UserRepository;
 
-import org.springframework.http.HttpStatus;
+import jakarta.persistence.EntityExistsException;
+import jakarta.persistence.EntityNotFoundException;
+
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -21,25 +23,37 @@ public class UserService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    public User login(LoginRequest loginRequest) {
-        // if no user is find, return false
+    /**
+     * Check if password is correct from the {@link LoginRequest}
+     * 
+     * @param loginRequest
+     * @return the user
+     * @throws EntityNotFoundException
+     * @throws UnauthorizedException
+     */
+    public User login(LoginRequest loginRequest) throws EntityNotFoundException, UnauthorizedException {
         User user = userRepository.findByEmail(loginRequest.getEmail());
         if (user == null) {
-            throw new HttpWithMsgException(HttpStatus.NOT_FOUND, "User not found");
+            throw new EntityNotFoundException("Can't find user with: " + loginRequest.getEmail());
         }
 
         // check if the password is correct
         if (!passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
-            throw new HttpWithMsgException(HttpStatus.UNAUTHORIZED, "Invalid password");
+            throw new UnauthorizedException("Invalid password");
         }
 
         return user;
     }
 
-    public boolean createUser(SignupRequest signupRequest) {
-        // if the user already exist return false
+    /**
+     * 
+     * @param signupRequest
+     * @return the saved entity; will never be null.
+     * @throws EntityExistsException
+     */
+    public User createUser(SignupRequest signupRequest) throws EntityExistsException {
         if (userRepository.existsByEmail(signupRequest.getEmail())) {
-            return false;
+            throw new EntityExistsException("Email already used");
         }
 
         User user = new User();
@@ -49,19 +63,22 @@ public class UserService {
         user.setLastName(signupRequest.getLastName());
         user.setUserName(signupRequest.getUserName());
 
-        userRepository.save(user);
-
-        return true;
+        return userRepository.save(user);
     }
 
-    public User findUserByEmail(String email) {
-        return userRepository.findByEmail(email);
+    public User findUserByEmail(String email) throws EntityNotFoundException {
+        User user = userRepository.findByEmail(email);
+
+        if (user == null) {
+            throw new EntityNotFoundException("User not found in DB");
+        }
+
+        return user;
     }
 
-    public boolean changeUser(User user, String userName) {
+    public User changeUserName(User user, String userName) {
         user.setUserName(userName);
-        userRepository.save(user);
 
-        return true;
+        return userRepository.save(user);
     }
 }

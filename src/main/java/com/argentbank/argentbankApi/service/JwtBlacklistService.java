@@ -44,7 +44,7 @@ public class JwtBlacklistService {
      * @return true if the token is currently backlisted. Otherwise return false if
      *         the token is not blacklisted or if he's removed from the blacklist.
      */
-    public boolean isBlackListed(String token) {
+    public boolean isBlackListed(String token) throws BlackListedException {
         Long expirationTime = blacklist.get(token);
 
         // if the token is not blacklisted

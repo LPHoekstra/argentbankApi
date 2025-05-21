@@ -9,14 +9,15 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import com.argentbank.argentbankApi.exception.HttpWithMsgException;
+import com.argentbank.argentbankApi.exception.UnauthorizedException;
 import com.argentbank.argentbankApi.model.User;
 import com.argentbank.argentbankApi.model.request.LoginRequest;
 import com.argentbank.argentbankApi.repository.UserRepository;
 import com.argentbank.argentbankApi.service.UserService;
+
+import jakarta.persistence.EntityNotFoundException;
 
 @SpringBootTest
 public class UserLoginTest {
@@ -35,9 +36,7 @@ public class UserLoginTest {
         String email = "test@gmail.com";
         String password = "password";
 
-        LoginRequest loginRequest = new LoginRequest();
-        loginRequest.setEmail(email);
-        loginRequest.setPassword(password);
+        LoginRequest loginRequest = new LoginRequest(email, password);
 
         User user = new User();
         user.setEmail(email);
@@ -56,18 +55,15 @@ public class UserLoginTest {
     @Test
     void testLoginUserNotFind() throws Exception {
         String email = "test@gmail.com";
+        String password = "password";
 
-        LoginRequest loginRequest = new LoginRequest();
-        loginRequest.setEmail(email);
+        LoginRequest loginRequest = new LoginRequest(
+                email, password);
 
         when(userRepository.findByEmail(loginRequest.getEmail())).thenReturn(null);
 
         // act
-        HttpWithMsgException exception = assertThrows(HttpWithMsgException.class,
-                () -> userService.login(loginRequest));
-
-        assertEquals(HttpStatus.NOT_FOUND, exception.getStatus());
-        assertEquals("User not found", exception.getMessage());
+        assertThrows(EntityNotFoundException.class, () -> userService.login(loginRequest));
     }
 
     @Test
@@ -76,9 +72,8 @@ public class UserLoginTest {
         String invalidPassword = "password";
         String correctPassword = "password123";
 
-        LoginRequest loginRequest = new LoginRequest();
-        loginRequest.setEmail(email);
-        loginRequest.setPassword(invalidPassword);
+        LoginRequest loginRequest = new LoginRequest(
+                email, invalidPassword);
 
         User user = new User();
         user.setEmail(email);
@@ -88,10 +83,9 @@ public class UserLoginTest {
         when(passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())).thenReturn(false);
 
         // act
-        HttpWithMsgException exception = assertThrows(HttpWithMsgException.class,
+        UnauthorizedException exception = assertThrows(
+                UnauthorizedException.class,
                 () -> userService.login(loginRequest));
-
-        assertEquals(HttpStatus.UNAUTHORIZED, exception.getStatus());
         assertEquals("Invalid password", exception.getMessage());
     }
 }

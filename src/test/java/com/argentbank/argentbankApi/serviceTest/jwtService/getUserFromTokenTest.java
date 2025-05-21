@@ -10,12 +10,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.HttpStatus;
 
-import com.argentbank.argentbankApi.exception.HttpWithMsgException;
+import com.argentbank.argentbankApi.exception.BlackListedException;
 import com.argentbank.argentbankApi.service.JwtBlacklistService;
 import com.argentbank.argentbankApi.service.JwtService;
 
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 
 @SpringBootTest
@@ -60,10 +60,8 @@ public class getUserFromTokenTest {
         when(jwtBlacklistService.isBlackListed(expiredToken)).thenReturn(false);
 
         // act
-        HttpWithMsgException exception = assertThrows(HttpWithMsgException.class,
+        assertThrows(ExpiredJwtException.class,
                 () -> jwtService.getUserFromToken(bearerToken));
-        assertEquals(HttpStatus.UNAUTHORIZED, exception.getStatus());
-        assertEquals("Token expired", exception.getMessage());
     }
 
     @Test
@@ -71,9 +69,9 @@ public class getUserFromTokenTest {
         String malformedToken = "invalid.token";
 
         // act
-        HttpWithMsgException exception = assertThrows(HttpWithMsgException.class,
+        RuntimeException exception = assertThrows(
+                RuntimeException.class,
                 () -> jwtService.getUserFromToken(malformedToken));
-        assertEquals(HttpStatus.UNAUTHORIZED, exception.getStatus());
         assertEquals("Invalid token format, does not have 'Bearer '", exception.getMessage());
     }
 
@@ -86,9 +84,9 @@ public class getUserFromTokenTest {
         when(jwtBlacklistService.isBlackListed(token)).thenReturn(true);
 
         // act
-        HttpWithMsgException exception = assertThrows(HttpWithMsgException.class,
+        BlackListedException exception = assertThrows(
+                BlackListedException.class,
                 () -> jwtService.getUserFromToken(bearerToken));
-        assertEquals(HttpStatus.UNAUTHORIZED, exception.getStatus());
         assertEquals("Token is blacklisted", exception.getMessage());
     }
 }
