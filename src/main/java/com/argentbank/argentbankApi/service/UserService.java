@@ -31,7 +31,7 @@ public class UserService {
      * @throws EntityNotFoundException
      * @throws UnauthorizedException
      */
-    public User login(LoginRequest loginRequest) throws EntityNotFoundException, UnauthorizedException {
+    public User login(LoginRequest loginRequest) throws EntityNotFoundException {
         User user = userRepository.findByEmail(loginRequest.getEmail());
         if (user == null) {
             throw new EntityNotFoundException("Can't find user with: " + loginRequest.getEmail());

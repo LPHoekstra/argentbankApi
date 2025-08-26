@@ -1,6 +1,6 @@
 package com.argentbank.argentbankApi.exception;
 
-public class UnauthorizedException extends Exception {
+public class UnauthorizedException extends RuntimeException {
 
     public UnauthorizedException(String message) {
         super(message);

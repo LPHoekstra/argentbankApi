@@ -3,7 +3,6 @@ package com.argentbank.argentbankApi.controller;
 import com.argentbank.argentbankApi.Utils.ResponseUtil;
 import com.argentbank.argentbankApi.exception.BlackListedException;
 import com.argentbank.argentbankApi.exception.MissingTokenException;
-import com.argentbank.argentbankApi.exception.UnauthorizedException;
 import com.argentbank.argentbankApi.model.*;
 import com.argentbank.argentbankApi.model.request.ChangeProfileRequest;
 import com.argentbank.argentbankApi.model.request.LoginRequest;
@@ -40,7 +39,7 @@ public class UserController {
 
     @PostMapping("/login")
     public ResponseEntity<ApiResponse> login(@Valid @RequestBody LoginRequest loginRequest)
-            throws EntityNotFoundException, UnauthorizedException {
+            throws EntityNotFoundException {
         log.debug("Login with email: {}", loginRequest.getEmail());
 
         User user = userService.login(loginRequest);
