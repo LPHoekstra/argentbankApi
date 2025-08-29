@@ -55,6 +55,8 @@ paths:
             $ref: '#/definitions/ApiResponse'
         '400':
           description: Invalid Fields
+        '409':
+          description: Email already used
         '500':
           description: Internal Server Error
   /user/profile:

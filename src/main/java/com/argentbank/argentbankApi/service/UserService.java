@@ -1,12 +1,12 @@
 package com.argentbank.argentbankApi.service;
 
+import com.argentbank.argentbankApi.exception.EmailUsedException;
 import com.argentbank.argentbankApi.exception.UnauthorizedException;
 import com.argentbank.argentbankApi.model.User;
 import com.argentbank.argentbankApi.model.request.LoginRequest;
 import com.argentbank.argentbankApi.model.request.SignupRequest;
 import com.argentbank.argentbankApi.repository.UserRepository;
 
-import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -49,11 +49,10 @@ public class UserService {
      * 
      * @param signupRequest
      * @return the saved entity; will never be null.
-     * @throws EntityExistsException
      */
-    public User createUser(SignupRequest signupRequest) throws EntityExistsException {
+    public User createUser(SignupRequest signupRequest) {
         if (userRepository.existsByEmail(signupRequest.getEmail())) {
-            throw new EntityExistsException("Email already used");
+            throw new EmailUsedException("Email already used");
         }
 
         User user = new User();

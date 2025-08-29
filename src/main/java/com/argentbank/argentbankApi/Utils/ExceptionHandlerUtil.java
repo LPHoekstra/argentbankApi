@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import com.argentbank.argentbankApi.exception.BlackListedException;
+import com.argentbank.argentbankApi.exception.EmailUsedException;
 import com.argentbank.argentbankApi.exception.MissingTokenException;
 import com.argentbank.argentbankApi.exception.UnauthorizedException;
 import com.argentbank.argentbankApi.model.response.ApiResponse;
@@ -26,6 +27,12 @@ public class ExceptionHandlerUtil {
     public ResponseEntity<ApiResponse> unauthorized(UnauthorizedException e) {
         log.error(e.getMessage());
         return ResponseUtil.buildResponse(HttpStatus.UNAUTHORIZED, "Non autorisé", null);
+    }
+
+    @ExceptionHandler(EmailUsedException.class)
+    public ResponseEntity<ApiResponse> emailAlreadyUsed(EmailUsedException e) {
+        log.error(e.getMessage());
+        return ResponseUtil.buildResponse(HttpStatus.CONFLICT, "Email déjà utilisé", null);
     }
 
     @ExceptionHandler(EntityExistsException.class)
