@@ -57,6 +57,23 @@ paths:
           description: Invalid Fields
         '500':
           description: Internal Server Error
+  /user/logout:
+    delete:
+      security:
+        - Bearer: []
+      tags:
+        - User Module
+      summary: Logout
+      description: Invalidate the auth token
+      responses:
+        '200':
+          description: Logout successfuly
+          schema:
+            $ref: '#/definitions/ApiResponse'
+        '400':
+          description: Missing token
+        '500':
+          description: Internal server error
   /user/profile:
     get:
       security:
