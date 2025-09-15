@@ -41,7 +41,7 @@ public class getUserFromTokenTest {
         when(jwtBlacklistService.isBlackListed(BearerToken)).thenReturn(false);
 
         // act
-        String userEmailFromToken = jwtService.getUserFromToken(BearerToken);
+        String userEmailFromToken = jwtService.getEmailFromToken(BearerToken);
 
         assertEquals(userEmail, userEmailFromToken, "User extract from token must be correct");
     }
@@ -61,7 +61,7 @@ public class getUserFromTokenTest {
 
         // act
         assertThrows(ExpiredJwtException.class,
-                () -> jwtService.getUserFromToken(bearerToken));
+                () -> jwtService.getEmailFromToken(bearerToken));
     }
 
     @Test
@@ -71,7 +71,7 @@ public class getUserFromTokenTest {
         // act
         RuntimeException exception = assertThrows(
                 RuntimeException.class,
-                () -> jwtService.getUserFromToken(malformedToken));
+                () -> jwtService.getEmailFromToken(malformedToken));
         assertEquals("Invalid token format, does not have 'Bearer '", exception.getMessage());
     }
 
@@ -86,7 +86,7 @@ public class getUserFromTokenTest {
         // act
         BlackListedException exception = assertThrows(
                 BlackListedException.class,
-                () -> jwtService.getUserFromToken(bearerToken));
+                () -> jwtService.getEmailFromToken(bearerToken));
         assertEquals("Token is blacklisted", exception.getMessage());
     }
 }

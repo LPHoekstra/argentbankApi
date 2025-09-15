@@ -22,6 +22,8 @@ import java.util.Date;
 @Service
 public class JwtService {
     private SecretKey secretKey;
+    // one hour expiration
+    public final static long JWT_EXPIRATION = 60 * 60 * 1000L;
 
     private final JwtBlacklistService jwtBlacklistService;
 
@@ -36,8 +38,6 @@ public class JwtService {
      * @return the token in String
      */
     public String generateToken(String userEmail) {
-        // token valide for one hour
-        long JWT_EXPIRATION = 60 * 60 * 1000L;
         return Jwts.builder()
                 .subject(userEmail)
                 .issuedAt(new Date())
@@ -48,32 +48,36 @@ public class JwtService {
 
     /**
      * 
-     * @param token with "Bearer "
+     * @param token
      * @return the user email : "test@gmail.com"
      */
-    public String getUserFromToken(String token) throws BlackListedException {
-        return verifyToken(extractToken(token)).getPayload().getSubject();
+    public String getEmailFromToken(String token) throws BlackListedException {
+        return verifyToken(token).getPayload().getSubject();
     }
 
     /**
-     * 
-     * @param token with "Bearer "
+     * return true if the token as been invalidate with success otherwise it return false.
+     * @param token
      */
-    public void invalidateToken(String token) {
-        String tokenValue = extractToken(token);
-        Date expirationDate = verifyToken(tokenValue).getPayload().getExpiration();
+    public boolean invalidateToken(String token) {
+        try {
+            Date expirationDate = verifyToken(token).getPayload().getExpiration();
+            
+            Boolean isBlacklisted = jwtBlacklistService.addToBlackList(token, expirationDate);
+            if (!isBlacklisted) {
+                throw new BlackListedException("Token already blacklisted");
+            }
 
-        Boolean isBlacklisted = jwtBlacklistService.addToBlackList(tokenValue, expirationDate);
-        if (!isBlacklisted) {
-            throw new BlackListedException("Token already blacklisted");
+            log.info("token {} black listed", token);
+            return true;
+        } catch (Exception e) {
+            return false;
         }
-
-        log.info("token {} black listed", token);
     }
 
     /**
      * 
-     * @param token only without "Bearer "
+     * @param token
      * @return
      */
     private Jws<Claims> verifyToken(String token)
@@ -89,20 +93,6 @@ public class JwtService {
                 .parseSignedClaims(token);
 
         return claims;
-    }
-
-    /**
-     * remove "bearer " from token
-     * 
-     * @param token
-     * @return
-     */
-    private String extractToken(String token) {
-        if (!token.startsWith("Bearer ")) {
-            throw new RuntimeException("Invalid token format, does not have 'Bearer '");
-        }
-
-        return token.substring(7);
     }
 
     /**

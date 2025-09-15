@@ -80,19 +80,19 @@ public class ExceptionHandlerUtil {
     // JWT Exception
     @ExceptionHandler(JwtException.class)
     public ResponseEntity<ApiResponse> jwtException(JwtException e) {
-        log.error("Token error: {}", e);
+        log.error("Token error: {}", e.getMessage());
         return ResponseUtil.buildResponse(HttpStatus.UNAUTHORIZED, "Token error", null);
     }
 
     @ExceptionHandler(UnsupportedJwtException.class)
     public ResponseEntity<ApiResponse> unsupportedJwtException(UnsupportedJwtException e) {
-        log.error("Token error: {}", e);
+        log.error("Token error: {}", e.getMessage());
         return ResponseUtil.buildResponse(HttpStatus.UNAUTHORIZED, "Token error", null);
     }
 
     @ExceptionHandler(ExpiredJwtException.class)
     public ResponseEntity<ApiResponse> expiredJwtException(ExpiredJwtException e) {
-        log.error("Token error: {}", e);
+        log.error("Token error: {}", e.getMessage());
         return ResponseUtil.buildResponse(HttpStatus.UNAUTHORIZED, "Token expired", null);
     }
 }

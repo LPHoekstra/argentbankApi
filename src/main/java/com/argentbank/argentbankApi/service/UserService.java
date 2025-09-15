@@ -42,7 +42,7 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    public User findUserByEmail(String email) throws EntityNotFoundException {
+    public User getByEmail(String email) throws EntityNotFoundException {
         User user = userRepository.findByEmail(email);
 
         if (user == null) {

@@ -17,13 +17,19 @@ public class SecurityConfig {
         http
                 .cors(cors -> cors.configurationSource(_ -> {
                     var corsConfiguration = new CorsConfiguration();
-                    corsConfiguration.setAllowedOrigins(List.of("http://localhost:3000"));
+                    corsConfiguration.setAllowedOrigins(List.of("http://localhost:4200"));
                     corsConfiguration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE"));
                     corsConfiguration.setAllowedHeaders(List.of("*"));
                     corsConfiguration.setAllowCredentials(true);
                     return corsConfiguration;
                 }))
-                .csrf(csrf -> csrf.disable());
+                .csrf(csrf -> csrf.disable())
+                .authorizeHttpRequests(auth -> auth
+                    .requestMatchers("/api/v1/user/login", "/api/v1/user/register").permitAll()
+                    // TODO use the security context for route below
+                    .requestMatchers("/api/v1/user/profile", "/api/v1/user/logout").permitAll()
+                    .anyRequest().denyAll()
+                );
         return http.build();
     }
 

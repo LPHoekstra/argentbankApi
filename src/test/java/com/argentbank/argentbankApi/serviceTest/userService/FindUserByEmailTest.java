@@ -30,7 +30,7 @@ public class FindUserByEmailTest {
         when(userRepository.findByEmail(email)).thenReturn(user);
 
         // act
-        User findUser = userService.findUserByEmail(email);
+        User findUser = userService.getByEmail(email);
 
         assertNotNull(findUser);
     }
