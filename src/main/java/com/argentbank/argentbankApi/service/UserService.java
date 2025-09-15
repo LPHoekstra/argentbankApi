@@ -1,9 +1,7 @@
 package com.argentbank.argentbankApi.service;
 
 import com.argentbank.argentbankApi.exception.EmailUsedException;
-import com.argentbank.argentbankApi.exception.UnauthorizedException;
 import com.argentbank.argentbankApi.model.User;
-import com.argentbank.argentbankApi.model.request.LoginRequest;
 import com.argentbank.argentbankApi.model.request.SignupRequest;
 import com.argentbank.argentbankApi.repository.UserRepository;
 
@@ -24,28 +22,6 @@ public class UserService {
     }
 
     /**
-     * Check if password is correct from the {@link LoginRequest}
-     * 
-     * @param loginRequest
-     * @return the user
-     * @throws EntityNotFoundException
-     * @throws UnauthorizedException
-     */
-    public User login(LoginRequest loginRequest) throws EntityNotFoundException {
-        User user = userRepository.findByEmail(loginRequest.getEmail());
-        if (user == null) {
-            throw new EntityNotFoundException("Can't find user with: " + loginRequest.getEmail());
-        }
-
-        // check if the password is correct
-        if (!passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
-            throw new UnauthorizedException("Invalid password");
-        }
-
-        return user;
-    }
-
-    /**
      * 
      * @param signupRequest
      * @return the saved entity; will never be null.
@@ -55,12 +31,13 @@ public class UserService {
             throw new EmailUsedException("Email already used");
         }
 
-        User user = new User();
-        user.setEmail(signupRequest.getEmail());
-        user.setPassword(passwordEncoder.encode(signupRequest.getPassword()));
-        user.setFirstName(signupRequest.getFirstName());
-        user.setLastName(signupRequest.getLastName());
-        user.setUserName(signupRequest.getUserName());
+        User user = new User(
+            signupRequest.getEmail(),
+            passwordEncoder.encode(signupRequest.getPassword()),
+            signupRequest.getFirstName(),
+            signupRequest.getLastName(),
+            signupRequest.getUserName()
+        );
 
         return userRepository.save(user);
     }

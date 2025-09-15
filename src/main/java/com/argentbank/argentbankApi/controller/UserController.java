@@ -1,7 +1,6 @@
 package com.argentbank.argentbankApi.controller;
 
 import com.argentbank.argentbankApi.Utils.ResponseUtil;
-import com.argentbank.argentbankApi.exception.BlackListedException;
 import com.argentbank.argentbankApi.exception.MissingTokenException;
 import com.argentbank.argentbankApi.model.*;
 import com.argentbank.argentbankApi.model.request.ChangeProfileRequest;
@@ -11,6 +10,7 @@ import com.argentbank.argentbankApi.model.response.ApiResponse;
 import com.argentbank.argentbankApi.model.response.ChangeProfileResponse;
 import com.argentbank.argentbankApi.model.response.LoginResponse;
 import com.argentbank.argentbankApi.model.response.ProfileResponse;
+import com.argentbank.argentbankApi.service.AuthService;
 import com.argentbank.argentbankApi.service.JwtService;
 import com.argentbank.argentbankApi.service.UserService;
 
@@ -29,12 +29,14 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/v1/user")
 public class UserController {
 
+    private final AuthService authService;
     private final UserService userService;
     private final JwtService jwtService;
 
-    public UserController(UserService userService, JwtService jwtService) {
+    public UserController(UserService userService, JwtService jwtService, AuthService authService) {
         this.userService = userService;
         this.jwtService = jwtService;
+        this.authService = authService;
     }
 
     @PostMapping("/login")
@@ -42,10 +44,9 @@ public class UserController {
             throws EntityNotFoundException {
         log.debug("Login with email: {}", loginRequest.getEmail());
 
-        User user = userService.login(loginRequest);
-        String token = jwtService.generateToken(user.getEmail());
+        String token = authService.login(loginRequest);
 
-        log.debug("Login successfully with email: {}", user.getEmail());
+        log.debug("Login successfully with email: {}", loginRequest.getEmail());
         return ResponseUtil.buildResponse(HttpStatus.OK, "Login successfully", new LoginResponse(token));
     }
 
@@ -60,19 +61,18 @@ public class UserController {
     }
 
     @DeleteMapping("/logout")
-    public ResponseEntity<ApiResponse> logout(@RequestHeader("Authorization") String token)
-            throws MissingTokenException, BlackListedException {
+    public ResponseEntity<ApiResponse> logout(@RequestHeader("Authorization") String token) {
         if (token == null || token.isBlank()) {
             throw new MissingTokenException("Token is missing in request header");
         }
 
-        jwtService.invalidateToken(token);
+        authService.logout(token);
+
         return ResponseUtil.buildResponse(HttpStatus.OK, "disconnected", null);
     }
 
     @GetMapping("/profile")
-    public ResponseEntity<ApiResponse> getProfile(@RequestHeader("Authorization") String token)
-            throws BlackListedException {
+    public ResponseEntity<ApiResponse> getProfile(@RequestHeader("Authorization") String token) {
         log.debug("getting profile from token: {}", token);
 
         String email = jwtService.getUserFromToken(token);
@@ -83,7 +83,8 @@ public class UserController {
                 user.getEmail(),
                 user.getFirstName(),
                 user.getLastName(),
-                user.getUserName());
+                user.getUserName()
+            );
 
         log.debug("Profile retrieved successfully from user: {}", user.getEmail());
         return ResponseUtil.buildResponse(HttpStatus.OK, "User profile retrieved successfully", profileResponse);
@@ -92,7 +93,7 @@ public class UserController {
     @PutMapping("/profile")
     public ResponseEntity<ApiResponse> changeProfile(
             @RequestHeader("Authorization") String token,
-            @Valid @RequestBody ChangeProfileRequest ChangeProfileRequest) throws BlackListedException {
+            @Valid @RequestBody ChangeProfileRequest ChangeProfileRequest) {
         log.debug("Updating profile with token: {}", token);
 
         String email = jwtService.getUserFromToken(token);

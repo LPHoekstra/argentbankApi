@@ -32,14 +32,14 @@ public class JwtService {
 
     /**
      * 
-     * @param user email
+     * @param userEmail email
      * @return the token in String
      */
-    public String generateToken(String user) {
+    public String generateToken(String userEmail) {
         // token valide for one hour
         long JWT_EXPIRATION = 60 * 60 * 1000L;
         return Jwts.builder()
-                .subject(user)
+                .subject(userEmail)
                 .issuedAt(new Date())
                 .expiration(new Date(new Date().getTime() + JWT_EXPIRATION))
                 .signWith(secretKey)
@@ -59,7 +59,7 @@ public class JwtService {
      * 
      * @param token with "Bearer "
      */
-    public void invalidateToken(String token) throws BlackListedException {
+    public void invalidateToken(String token) {
         String tokenValue = extractToken(token);
         Date expirationDate = verifyToken(tokenValue).getPayload().getExpiration();
 

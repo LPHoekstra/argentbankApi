@@ -89,6 +89,8 @@ paths:
             $ref: '#/definitions/UserProfileResponse'
         '400':
           description: Invalid Fields
+        '401':
+          description: Not authorized
         '500':
           description: Internal Server Error
     put:
@@ -114,6 +116,8 @@ paths:
             $ref: '#/definitions/PutUserProfileResponse'
         '400':
           description: Invalid Fields
+        '401':
+          description: Not authorized
         '500':
           description: Internal Server Error
   /transactions/account:

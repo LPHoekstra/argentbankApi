@@ -2,7 +2,6 @@ package com.argentbank.argentbankApi.model;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
-
 import java.util.Date;
 
 @Document(collection = "users")
@@ -18,6 +17,17 @@ public class User {
     private Date updatedAt;
 
     public User() {}
+
+    /**
+     * The password field MUST be encoded before.
+     */
+    public User(String email, String password, String firstName, String lastName, String userName) {
+        this.email = email;
+        this.password = password;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.userName = userName;
+    }
 
     public String getId() {
         return id;
