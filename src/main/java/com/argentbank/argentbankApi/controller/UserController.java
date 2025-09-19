@@ -54,7 +54,7 @@ public class UserController {
         userService.createUser(signupRequest);
 
         log.debug("Account with email: {} created with success", signupRequest.getEmail());
-        return ResponseUtil.buildResponse(HttpStatus.OK, "Signup successfully", null);
+        return ResponseUtil.buildResponse(HttpStatus.CREATED, "Signup successfully", null);
     }
 
     @DeleteMapping("/logout")

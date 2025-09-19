@@ -11,6 +11,7 @@ import com.argentbank.argentbankApi.exception.BlackListedException;
 
 import lombok.extern.slf4j.Slf4j;
 
+// TODO store the blacklisted token in a DB
 @Slf4j
 @Service
 public class JwtBlacklistService {
