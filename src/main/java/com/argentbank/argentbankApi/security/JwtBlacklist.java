@@ -1,23 +1,22 @@
-package com.argentbank.argentbankApi.service;
+package com.argentbank.argentbankApi.security;
 
 import java.util.Date;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Service;
-
+import org.springframework.stereotype.Component;
 import com.argentbank.argentbankApi.exception.BlackListedException;
 
 import lombok.extern.slf4j.Slf4j;
 
 // TODO store the blacklisted token in a DB
 @Slf4j
-@Service
-public class JwtBlacklistService {
+@Component
+public class JwtBlacklist {
     private final ConcurrentHashMap<String, Long> blacklist;
 
-    public JwtBlacklistService(ConcurrentHashMap<String, Long> blacklist) {
+    public JwtBlacklist(ConcurrentHashMap<String, Long> blacklist) {
         this.blacklist = blacklist;
     }
 
@@ -27,7 +26,7 @@ public class JwtBlacklistService {
      * @param expirationDate of the token
      * @return a boolean if the token is blacklisted with success or not
      */
-    public Boolean addToBlackList(String token, Date expirationDate) {
+    public Boolean add(String token, Date expirationDate) {
         long expirationTime = expirationDate.getTime();
         Long isBlacklisted = blacklist.put(token, expirationTime);
 

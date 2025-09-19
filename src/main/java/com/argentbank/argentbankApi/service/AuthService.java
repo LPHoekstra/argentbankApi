@@ -7,6 +7,7 @@ import com.argentbank.argentbankApi.exception.UnauthorizedException;
 import com.argentbank.argentbankApi.model.User;
 import com.argentbank.argentbankApi.model.request.LoginRequest;
 import com.argentbank.argentbankApi.repository.UserRepository;
+import com.argentbank.argentbankApi.security.JwtProvider;
 
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.Cookie;
@@ -20,9 +21,9 @@ public class AuthService {
     
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final JwtService jwtService;
+    private final JwtProvider jwtService;
 
-    public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtService jwtService) {
+    public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtProvider jwtService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
@@ -72,7 +73,7 @@ public class AuthService {
     private Cookie generateAuthTokenCookie(String token) {
         Cookie cookie = new Cookie(AUTH_TOKEN, token);
         cookie.setHttpOnly(true);
-        cookie.setMaxAge(Math.toIntExact(JwtService.JWT_EXPIRATION / 1000l));
+        cookie.setMaxAge(Math.toIntExact(JwtProvider.JWT_EXPIRATION / 1000l));
         cookie.setSecure(true);
         cookie.setDomain(FRONT_DOMAIN);
         cookie.setPath("/");
@@ -83,7 +84,7 @@ public class AuthService {
     private Cookie generateIsAuthCookie() {
         Cookie cookie = new Cookie("isAuth", "1");
         cookie.setHttpOnly(false);
-        cookie.setMaxAge(Math.toIntExact(JwtService.JWT_EXPIRATION / 1000l));
+        cookie.setMaxAge(Math.toIntExact(JwtProvider.JWT_EXPIRATION / 1000l));
         cookie.setDomain(FRONT_DOMAIN);
         cookie.setPath("/");
 

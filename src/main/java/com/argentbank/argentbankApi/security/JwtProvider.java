@@ -1,4 +1,4 @@
-package com.argentbank.argentbankApi.service;
+package com.argentbank.argentbankApi.security;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
@@ -20,14 +20,14 @@ import java.util.Date;
 
 @Slf4j
 @Service
-public class JwtService {
+public class JwtProvider {
     private SecretKey secretKey;
     // one hour expiration
     public final static long JWT_EXPIRATION = 60 * 60 * 1000L;
 
-    private final JwtBlacklistService jwtBlacklistService;
+    private final JwtBlacklist jwtBlacklistService;
 
-    public JwtService(JwtBlacklistService jwtBlacklistService, @Value("${jwt.secret}") String secret) {
+    public JwtProvider(JwtBlacklist jwtBlacklistService, @Value("${jwt.secret}") String secret) {
         this.jwtBlacklistService = jwtBlacklistService;
         this.secretKey = Keys.hmacShaKeyFor(Base64.getDecoder().decode(secret));
     }
@@ -63,7 +63,7 @@ public class JwtService {
         try {
             Date expirationDate = verifyToken(token).getPayload().getExpiration();
             
-            Boolean isBlacklisted = jwtBlacklistService.addToBlackList(token, expirationDate);
+            Boolean isBlacklisted = jwtBlacklistService.add(token, expirationDate);
             if (!isBlacklisted) {
                 throw new BlackListedException("Token already blacklisted");
             }

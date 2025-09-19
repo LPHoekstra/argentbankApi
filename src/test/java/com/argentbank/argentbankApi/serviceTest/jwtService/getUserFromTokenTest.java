@@ -12,8 +12,8 @@ import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import com.argentbank.argentbankApi.exception.BlackListedException;
-import com.argentbank.argentbankApi.service.JwtBlacklistService;
-import com.argentbank.argentbankApi.service.JwtService;
+import com.argentbank.argentbankApi.security.JwtBlacklist;
+import com.argentbank.argentbankApi.security.JwtProvider;
 
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
@@ -22,14 +22,14 @@ import io.jsonwebtoken.Jwts;
 public class getUserFromTokenTest {
 
     @Mock
-    private JwtBlacklistService jwtBlacklistService;
+    private JwtBlacklist jwtBlacklistService;
 
-    private JwtService jwtService;
+    private JwtProvider jwtService;
 
     @BeforeEach
     void setUp() {
         String secret = "fh7ZBsC7I9OokW92A1dMXjx6lufpMNKO6gU2sXXtNr0";
-        jwtService = new JwtService(jwtBlacklistService, secret);
+        jwtService = new JwtProvider(jwtBlacklistService, secret);
     }
 
     @Test

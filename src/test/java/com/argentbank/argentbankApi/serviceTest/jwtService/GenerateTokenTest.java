@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import com.argentbank.argentbankApi.service.JwtService;
+import com.argentbank.argentbankApi.security.JwtProvider;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -17,7 +17,7 @@ import io.jsonwebtoken.Jwts;
 public class GenerateTokenTest {
 
     @Autowired
-    private JwtService jwtService;
+    private JwtProvider jwtService;
 
     @Test
     void generateTokenWithSuccess() throws Exception {

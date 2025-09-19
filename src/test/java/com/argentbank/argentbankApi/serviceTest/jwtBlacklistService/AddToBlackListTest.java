@@ -15,7 +15,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import com.argentbank.argentbankApi.service.JwtBlacklistService;
+import com.argentbank.argentbankApi.security.JwtBlacklist;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -25,14 +25,14 @@ public class AddToBlackListTest {
     private final SecretKey secretKey = Keys
             .hmacShaKeyFor(Base64.getDecoder().decode("d9qYD2WfPRNUOcydnzg4OGMvg+Am9+KpBuf2aEOnV2E="));
 
-    private JwtBlacklistService jwtBlacklistService;
+    private JwtBlacklist jwtBlacklistService;
     private ConcurrentHashMap<String, Long> blacklistMock = spy(new ConcurrentHashMap<>());
 
     private Date expirationDate = new Date(new Date().getTime() + 60 * 60 * 1000L);
 
     @BeforeEach
     void setUp() {
-        jwtBlacklistService = new JwtBlacklistService(blacklistMock);
+        jwtBlacklistService = new JwtBlacklist(blacklistMock);
     }
 
     @Test
@@ -40,7 +40,7 @@ public class AddToBlackListTest {
         String token = createTestToken(expirationDate);
 
         // act
-        Boolean isBlackListedWithSuccess = jwtBlacklistService.addToBlackList(token, expirationDate);
+        Boolean isBlackListedWithSuccess = jwtBlacklistService.add(token, expirationDate);
 
         assertTrue(isBlackListedWithSuccess, "Expect to return true");
     }
@@ -53,7 +53,7 @@ public class AddToBlackListTest {
         when(blacklistMock.put(token, expirationTime)).thenReturn(123456789L);
 
         // act
-        Boolean isBlackListed = jwtBlacklistService.addToBlackList(token, expirationDate);
+        Boolean isBlackListed = jwtBlacklistService.add(token, expirationDate);
 
         assertFalse(isBlackListed, "Expect to return false");
     }

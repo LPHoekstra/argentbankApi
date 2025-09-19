@@ -12,16 +12,16 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import com.argentbank.argentbankApi.service.JwtBlacklistService;
+import com.argentbank.argentbankApi.security.JwtBlacklist;
 
 @SpringBootTest
 public class IsBlackListedTest {
-    private JwtBlacklistService jwtBlacklistService;
+    private JwtBlacklist jwtBlacklistService;
     private ConcurrentHashMap<String, Long> blacklistMock = spy(new ConcurrentHashMap<>());
 
     @BeforeEach
     void setUp() {
-        jwtBlacklistService = new JwtBlacklistService(blacklistMock);
+        jwtBlacklistService = new JwtBlacklist(blacklistMock);
     }
 
     @Test

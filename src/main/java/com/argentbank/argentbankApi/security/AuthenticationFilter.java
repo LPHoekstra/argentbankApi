@@ -1,4 +1,4 @@
-package com.argentbank.argentbankApi.config;
+package com.argentbank.argentbankApi.security;
 
 import java.io.IOException;
 import java.util.List;
@@ -9,7 +9,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.argentbank.argentbankApi.service.AuthService;
-import com.argentbank.argentbankApi.service.JwtService;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -22,9 +21,9 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 public class AuthenticationFilter extends OncePerRequestFilter {
 
-    private final JwtService jwtService;
+    private final JwtProvider jwtService;
 
-    public AuthenticationFilter(JwtService jwtService) {
+    public AuthenticationFilter(JwtProvider jwtService) {
         this.jwtService = jwtService;
     }
 

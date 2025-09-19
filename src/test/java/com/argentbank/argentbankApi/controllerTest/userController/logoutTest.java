@@ -14,7 +14,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-import com.argentbank.argentbankApi.service.JwtService;
+import com.argentbank.argentbankApi.security.JwtProvider;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -24,7 +24,7 @@ public class logoutTest {
     private MockMvc mockMvc;
 
     @MockitoBean
-    private JwtService jwtService;
+    private JwtProvider jwtService;
 
     @Test
     void tokenIsMissing() throws Exception {

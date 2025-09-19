@@ -8,8 +8,8 @@ import com.argentbank.argentbankApi.model.request.SignupRequest;
 import com.argentbank.argentbankApi.model.response.ApiResponse;
 import com.argentbank.argentbankApi.model.response.ChangeProfileResponse;
 import com.argentbank.argentbankApi.model.response.ProfileResponse;
+import com.argentbank.argentbankApi.security.JwtProvider;
 import com.argentbank.argentbankApi.service.AuthService;
-import com.argentbank.argentbankApi.service.JwtService;
 import com.argentbank.argentbankApi.service.UserService;
 
 import jakarta.servlet.http.HttpServletResponse;
@@ -29,9 +29,9 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
     private final AuthService authService;
     private final UserService userService;
-    private final JwtService jwtService;
+    private final JwtProvider jwtService;
 
-    public UserController(UserService userService, JwtService jwtService, AuthService authService) {
+    public UserController(UserService userService, JwtProvider jwtService, AuthService authService) {
         this.userService = userService;
         this.jwtService = jwtService;
         this.authService = authService;

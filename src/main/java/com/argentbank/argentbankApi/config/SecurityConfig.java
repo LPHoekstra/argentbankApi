@@ -12,6 +12,8 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 
+import com.argentbank.argentbankApi.security.AuthenticationFilter;
+
 @Configuration
 public class SecurityConfig {
 
